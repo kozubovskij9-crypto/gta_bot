@@ -13,8 +13,30 @@ class ZoneSelector:
         self.active = False
         self.current_zone_name = None
 
+        # Cached zones loaded from disk
+        self.zones = {}
+        self._load_zones()
+
         # F6 = запускаємо вибір зони
         keyboard.add_hotkey("f6", self.open_selector)
+
+    # -----------------------------------------------------
+    # LOAD ZONES FROM FILE
+    # -----------------------------------------------------
+    def _load_zones(self):
+        if not os.path.exists(ZONES_FILE):
+            self.zones = {}
+            return
+
+        try:
+            with open(ZONES_FILE, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            # normalize tuples
+            self.zones = {
+                k: (v["x1"], v["y1"], v["x2"], v["y2"]) for k, v in raw.items()
+            }
+        except Exception:
+            self.zones = {}
 
     def open_selector(self, zone_name=None):
         """Запуск напівпрозорого вікна для виділення зони"""
@@ -90,6 +112,9 @@ class ZoneSelector:
             name = self.current_zone_name
 
         data[name] = zone
+
+        # refresh cache for overlay/ocr
+        self.zones[name] = (zone["x1"], zone["y1"], zone["x2"], zone["y2"])
 
         with open(ZONES_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)

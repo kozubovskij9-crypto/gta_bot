@@ -17,10 +17,11 @@ class LogicEngine:
     ✔ HUD status updates
     """
 
-    def __init__(self, ocr, overlay, hud, zones_folder="answers"):
+    def __init__(self, ocr, overlay, hud, zones, zones_folder="answers"):
         self.ocr = ocr
         self.overlay = overlay
         self.hud = hud
+        self.zones = zones
 
         self.zones_folder = zones_folder
         os.makedirs(self.zones_folder, exist_ok=True)
@@ -46,14 +47,14 @@ class LogicEngine:
         if not self.thread.is_alive():
             self.thread = threading.Thread(target=self._loop, daemon=True)
         self.running = True
-        self.hud.set_bot_status("🟢 BOT RUNNING")
+        self.hud.set_bot_status("RUNNING")
         self.overlay.set_status("BOT ACTIVE")
         self.thread.start()
 
     def stop(self):
         """Зупинка логіки"""
         self.running = False
-        self.hud.set_bot_status("🔴 BOT STOPPED")
+        self.hud.set_bot_status("STOPPED")
         self.overlay.set_status("BOT STOPPED")
 
     # ======================================================================
