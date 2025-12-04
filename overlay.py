@@ -14,11 +14,12 @@ class Overlay:
     - Smart update: redraw only when answer changes
     """
 
-    def __init__(self):
+    def __init__(self, zones):
         self.hwnd = None
         self.frame_rect = None
         self.needs_redraw = False
         self.running = True
+        self.zones = zones
 
         threading.Thread(target=self._create_window, daemon=True).start()
         threading.Thread(target=self._render_loop, daemon=True).start()
@@ -112,9 +113,26 @@ class Overlay:
         self.frame_rect = rect
         self.needs_redraw = True
 
+    def highlight(self, answer_index):
+        """Highlight one of three answer slots by index (0..2)."""
+        key = f"answer{answer_index + 1}"
+        rect = None
+
+        if self.zones and self.zones.zones:
+            rect = self.zones.zones.get(key)
+
+        if rect:
+            self.highlight_zone(rect)
+        else:
+            self.clear_highlight()
+
     def clear_highlight(self):
         self.frame_rect = None
         self.needs_redraw = True
 
     def stop(self):
         self.running = False
+
+    # Compatibility hooks for HUD/Logic
+    def set_status(self, _):
+        pass

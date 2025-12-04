@@ -1,4 +1,3 @@
-import threading
 from gui_pro import run_gui
 from overlay import Overlay
 from hud_panel import HUDPanel
@@ -14,15 +13,10 @@ class BotCore:
 
         # --- Core components ---
         self.zones = ZoneSelector()
-        self.ocr = OCREngine()
-        self.overlay = Overlay()
-        self.hud = HUDPanel(self.overlay)
-        self.logic = LogicEngine(self.ocr, self.overlay, self.zones, self.hud)
-
-        # --- Auto-start modules ---
-        threading.Thread(target=self.ocr.loop, daemon=True).start()
-        threading.Thread(target=self.overlay.loop, daemon=True).start()
-        threading.Thread(target=self.hud.loop, daemon=True).start()
+        self.ocr = OCREngine(self.zones)
+        self.overlay = Overlay(self.zones)
+        self.hud = HUDPanel()
+        self.logic = LogicEngine(self.ocr, self.overlay, self.hud, self.zones)
 
         log("Core modules initialized.")
 

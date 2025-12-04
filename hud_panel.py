@@ -163,14 +163,32 @@ class HUDPanel:
     def update_bot_status(self, text):
         self.status_bot = text
 
+    def set_bot_status(self, text):
+        self.update_bot_status(text.replace("🟢 ", "").replace("🔴 ", "").replace("BOT ", ""))
+
     def update_ocr_status(self, text):
         self.status_ocr = text
+
+    def set_ocr_status(self, text):
+        self.update_ocr_status(text)
 
     def update_npc(self, npc):
         self.npc_name = npc
 
+    def set_current_name(self, npc):
+        self.update_npc(npc)
+
     def update_question(self, q):
         self.question = q
 
+    def set_question_text(self, q):
+        self.update_question(q)
+
     def update_answer(self, ans):
         self.answer = ans
+
+    def set_selected_answer(self, ans):
+        self.update_answer(ans)
+
+    def set_error(self, err):
+        self.update_bot_status(f"ERROR: {err}")

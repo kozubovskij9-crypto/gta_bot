@@ -25,7 +25,12 @@ class OCREngine:
             if self.enabled and self.zones is not None:
                 try:
                     self.status = "Reading..."
-                    self.last_result = self.read_all()
+                    npc, question, answers = self.read_all()
+                    self.last_result = {
+                        "name": npc,
+                        "question": question,
+                        "answers": answers,
+                    }
                     self.status = "OK"
                 except Exception as e:
                     self.status = f"OCR Error: {e}"
@@ -79,27 +84,38 @@ class OCREngine:
         return self.ocr_pass(img)
 
     def read_all(self):
-        if not self.zones or not self.zones.zones:
-            return {}
+        """Read NPC name, question and three answers from configured zones."""
+        if not self.zones or not getattr(self.zones, "zones", None):
+            return "", "", ["", "", ""]
 
-        out = {}
-
-        try:
-            out["name"] = self.read_zone(self.zones.zones["name"])
-        except:
-            out["name"] = ""
+        zones = self.zones.zones
 
         try:
-            out["question"] = self.read_zone(self.zones.zones["question"])
-        except:
-            out["question"] = ""
+            npc = self.read_zone(zones.get("name")) if zones.get("name") else ""
+        except Exception:
+            npc = ""
 
-        # 3 fixed answers (пояснити / запевнити / надавити)
+        try:
+            question = self.read_zone(zones.get("question")) if zones.get("question") else ""
+        except Exception:
+            question = ""
+
+        answers = []
         for i in range(1, 4):
             key = f"answer{i}"
             try:
-                out[key] = self.read_zone(self.zones.zones[key])
-            except:
-                out[key] = ""
+                ans = self.read_zone(zones.get(key)) if zones.get(key) else ""
+            except Exception:
+                ans = ""
+            answers.append(ans)
 
-        return out
+        return npc, question, answers
+
+    # debug helper for GUI
+    def read_raw_debug(self):
+        npc, question, answers = self.read_all()
+        return f"NPC: {npc}\nQ: {question}\nANS: {answers}"
+
+    def attach_logger(self, _):
+        """Compatibility stub for GUI."""
+        pass
